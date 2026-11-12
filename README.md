@@ -1,2 +1,2 @@
 # Omics-in-practice
-Repository of omics in practice
+This repository contains the code generated for...
