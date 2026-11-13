@@ -1,3 +1,4 @@
+#Load R and install packages
 library(DESeq2)
 library(data.table)
 library(ggplot2)
@@ -51,6 +52,7 @@ p_lib <- ggplot(lib_df, aes(sample, library_size, fill = condition)) +
 
 ggsave("figures/library_sizes.pdf", p_lib, width = 8, height = 5)
 
+# Create the DESeq2 dataset
 metadata$condition <- factor(metadata$condition)
 metadata$condition <- relevel(metadata$condition, ref = "K562_0h")
 
@@ -69,9 +71,12 @@ cat("Genes retained:", nrow(dds), "\n")
 # Save the prepared object
 saveRDS(dds, "results/dds_prefiltered.rds")
 
+
+#Transform counts for visualization
 vsd <- vst(dds, blind = TRUE)
 vsd_mat <- assay(vsd)
 
+# Compute and draw PCA
 pca_data <- plotPCA(vsd, intgroup = c("condition", "replicate"), returnData = TRUE)
 percent_var <- round(100 * attr(pca_data, "percentVar"))
 p_pca <- ggplot(pca_data, aes(PC1, PC2, color = condition, shape = replicate, label = name)) +
@@ -84,6 +89,7 @@ labs(title = "PCA of variance-stabilized counts")
 ggsave("figures/PCA_samples.pdf", p_pca, width = 7, height = 5.5)
 fwrite(pca_data, "results/PCA_coordinates.tsv", sep = "\t")
 
+# Sample to sample distance heatmap
 sample_dists <- dist(t(vsd_mat))
 sample_dist_mat <- as.matrix(sample_dists)
 rownames(sample_dist_mat) <- colnames(vsd_mat)
